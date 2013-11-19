@@ -41,7 +41,7 @@ with open('/dev/stdin', 'rb') as bindat:
             barcodes.append(make_barcode(passcnt, XOR, block))
         else:
             lastblock = block
-        block = bindat.read(BLOCKSIZE)
+        block = bindat.read(BLOCKSIZE-1)
 if passcnt % 2 == 1:
     barcodes.append(make_barcode(passcnt, DUP, lastblock) )
 
