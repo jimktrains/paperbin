@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-import barcode
 import base64
 import ctypes
 
@@ -13,10 +12,12 @@ DATA = '-'
 XOR  = '%'
 DUP  = '+'
 
-def make_barcode(num, typesym, block, name):
-    block = base64.b32encode(bytes(ctypes.c_uint16(num))).decode('ascii').replace('=','') + typesym + base64.b32encode(block).decode('ascii').replace('=','')
-    print(block)
-    return block
+def make_barcode(num, typesym, block):
+    num = base64.b32encode(bytes(ctypes.c_uint16(num)))
+    newblock = num.decode('ascii').replace('=','')
+    newblock += typesym
+    newblock += base64.b32encode(block).decode('ascii').replace('=','')
+    return newblock
 
 def sxor(s1,s2):    
     if len(s1) != len(s2):
@@ -25,17 +26,34 @@ def sxor(s1,s2):
 
 BLOCKSIZE = 8
 
+barcodes = []
+
 with open('/dev/stdin', 'rb') as bindat:
     block = bindat.read(BLOCKSIZE)
     while len(block) != 0:
         block = block + (b'\0' * (BLOCKSIZE - len(block)))
         passcnt += 1
-        make_barcode(passcnt, DATA, block, "test-%d" % passcnt)
+        barcodes.append(make_barcode(passcnt, DATA, block))
         if passcnt % 2 == 0:
             block = sxor(block, lastblock)
-            make_barcode(passcnt, XOR, block, "test-%dp%d" % (passcnt - 1, passcnt))
+            barcodes.append(make_barcode(passcnt, XOR, block))
         else:
             lastblock = block
         block = bindat.read(BLOCKSIZE)
 if passcnt % 2 == 1:
-    make_barcode(passcnt, DUP, lastblock, "test-%dp%d" % (passcnt, passcnt) )
+    barcodes.append(make_barcode(passcnt, DUP, lastblock) )
+
+
+print(barcodes)
+
+# Cycle the Blocks across the pages
+pages = []
+PAGE_CNT = 3
+pages = [[] for i in range(PAGE_CNT)]
+offset = -1
+for i in range(len(barcodes)):
+    if i % PAGE_CNT == 0:
+        offset = (offset + 1) % PAGE_CNT
+    pages[ (i + offset) % PAGE_CNT ].append(barcodes[i])
+
+print(pages)
