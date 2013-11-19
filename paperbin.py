@@ -24,14 +24,15 @@ def sxor(s1,s2):
         raise Exception("Lengths must be equal to xor")
     return bytes(a ^ b for a,b in zip(s1,s2))
 
-BLOCKSIZE = 8
+BLOCKSIZE = 7
 
 barcodes = []
 
 with open('/dev/stdin', 'rb') as bindat:
     block = bindat.read(BLOCKSIZE)
     while len(block) != 0:
-        block = block + (b'\0' * (BLOCKSIZE - len(block)))
+        padding = BLOCKSIZE - len(block) + 1
+        block = block + bytes([padding for i in range(padding)])
         passcnt += 1
         barcodes.append(make_barcode(passcnt, DATA, block))
         if passcnt % 2 == 0:
