@@ -3,15 +3,37 @@
 import sys
 import base64
 import ctypes
+import argparse
 
 passcnt = 0
 block = None
 lastblock = None;
+barcodes = []
+
+
+parser = argparse.ArgumentParser(description='Creates data and XOR-parity blocks suitable for human or barcode entry')
+parser.add_argument('--type', dest='type', action='store', default="CODE39", help='Type of Barcode. Values maybe CODE39 or QRCODE')
+
+args = parser.parse_args()
+print(args)
+
+if args.type not in ('CODE39', 'QRCODE'):
+    parser.print_help()
+    sys.exit(1)
+
+BLOCKSIZE = None
+
+if args.type = 'CODE39':
+    BLOCKSIZE = 8
+elif args.type = 'QRCODE':
+    BLOCKSIZE = 128
 
 DATA = '-'
 XOR  = '%'
 DUP  = '+'
 
+# The barcode is of the form
+# <base32(block number)><type><base32(block)>
 def make_barcode(num, typesym, block):
     num = base64.b32encode(bytes(ctypes.c_uint16(num)))
     newblock = num.decode('ascii').replace('=','')
@@ -23,10 +45,6 @@ def sxor(s1,s2):
     if len(s1) != len(s2):
         raise Exception("Lengths must be equal to xor")
     return bytes(a ^ b for a,b in zip(s1,s2))
-
-BLOCKSIZE = 8
-
-barcodes = []
 
 with open('/dev/stdin', 'rb') as bindat:
     # Minus 1 so the padding will fit
@@ -42,7 +60,11 @@ with open('/dev/stdin', 'rb') as bindat:
         else:
             lastblock = block
         block = bindat.read(BLOCKSIZE-1)
-if passcnt % 2 == 1:
+
+# Simply duplicating the last block may not be an option
+# if more than 3 groups are used.
+if passcnt % 2 != 0:
+    barcodes.append(make_barcode(passcnt, DUP, lastblock) )
     barcodes.append(make_barcode(passcnt, DUP, lastblock) )
 
 
