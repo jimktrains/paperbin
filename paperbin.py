@@ -23,9 +23,9 @@ if args.type not in ('CODE39', 'QRCODE'):
 
 BLOCKSIZE = None
 
-if args.type = 'CODE39':
+if args.type == 'CODE39':
     BLOCKSIZE = 8
-elif args.type = 'QRCODE':
+elif args.type == 'QRCODE':
     BLOCKSIZE = 128
 
 DATA = '-'
