@@ -7,6 +7,10 @@ The application reads from stdin and creates blocks of data. Every 2 blocks are 
 
 All of the blocks are then sorted into 3 different groups.  Only data from any two groups for each set of blocks is needed to regenerate the original message.
 
-Lastly (and not complete yet), the barcodes in each group are converted to pages of barcodes.
+Lastly, the barcodes in each group are converted to pages of barcodes.
 
 These barcodes can then be scanned in and reässembled later to create the original message (Work in progress).
+
+Example
+    gpg --export-secret-key | python3 paperbin.py --name secret-key
+
