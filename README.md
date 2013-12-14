@@ -12,5 +12,6 @@ Lastly, the barcodes in each group are converted to pages of barcodes.
 These barcodes can then be scanned in and reässembled later to create the original message (Work in progress).
 
 Example
+
     gpg --export-secret-key | python3 paperbin.py --name secret-key
 
