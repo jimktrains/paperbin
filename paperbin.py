@@ -48,7 +48,7 @@ def sxor(s1,s2):
         raise Exception("Lengths must be equal to xor")
     return bytes(a ^ b for a,b in zip(s1,s2))
 
-with open('/dev/stdin', 'rb') as bindat:
+with sys.stdin.detach() as bindat:
     # Minus 1 so the padding will fit
     block = bindat.read(BLOCKSIZE-1)
     while len(block) != 0:
